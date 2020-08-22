@@ -6,8 +6,10 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"net/http"
 	"os"
 	"strings"
+	"time"
 )
 
 var (
@@ -15,26 +17,20 @@ var (
 	footer = strings.NewReader("\a")
 )
 
-func open(path string) (*os.File, error) {
-	return os.Open(path)
-}
-
 // Show writes the image as RGB to the iTerm2
-func Show(w io.Writer, path string) error {
+func Show(w io.Writer, path string, isURL bool) error {
 
-	f, err := open(path)
+	content, err := getContent(path, isURL)
 	if err != nil {
-		return fmt.Errorf("😱 ~ Oops I could not open the file: %v", err.Error())
+		return err
 	}
-	defer f.Close()
-
 	pr, pw := io.Pipe()
 	go func() {
 		defer pw.Close()
 
 		wc := base64.NewEncoder(base64.StdEncoding, pw)
 
-		_, err := io.Copy(wc, f)
+		_, err := io.Copy(wc, content)
 		if err != nil {
 			pw.CloseWithError(fmt.Errorf("😱 ~ Oops I could not encode the image to base64: %v", err.Error()))
 			return
@@ -90,10 +86,32 @@ func Write(from, to string) error {
 	return nil
 }
 
+func open(path string) (*os.File, error) {
+	return os.Open(path)
+}
+
 func getBase64(f *os.File) string {
 
 	r := bufio.NewReader(f)
 	enc, _ := ioutil.ReadAll(r)
 	encoded := base64.StdEncoding.EncodeToString(enc)
 	return encoded
+}
+
+func getContent(path string, isURL bool) (io.Reader, error) {
+	time.Sleep(5 * time.Second)
+	if !isURL {
+		f, err := open(path)
+		if err != nil {
+			return nil, fmt.Errorf("😱 ~ Oops I could not open the file: %v", err.Error())
+		}
+		return f, nil
+	}
+
+	resp, err := http.Get(path)
+	if err != nil {
+		return nil, fmt.Errorf("🤯 ~ Looks like something is wring with the URL or your network")
+	}
+	return resp.Body, nil
+	return nil, nil
 }

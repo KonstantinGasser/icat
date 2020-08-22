@@ -34,12 +34,13 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		path, err := cmd.Flags().GetString("select")
-		if err != nil || path == "nil" {
+		path, errP := cmd.Flags().GetString("select")
+		isURL, errU := cmd.Flags().GetBool("url")
+		if errP != nil || errU != nil || path == "nil" {
 			return fmt.Errorf("🤨 ~ You forgort to specify the path to the image")
 
 		}
-		if err := internal.Show(os.Stdout, path); err != nil {
+		if err := internal.Show(os.Stdout, path, isURL); err != nil {
 			return err
 		}
 		return nil
@@ -49,4 +50,5 @@ to quickly create a Cobra application.`,
 func init() {
 	rootCmd.AddCommand(showCmd)
 	showCmd.Flags().StringP("select", "s", "nil", "📍Select location of the image")
+	showCmd.Flags().Bool("url", false, "🌐 If set fethes image from given URL")
 }
