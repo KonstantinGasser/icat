@@ -24,13 +24,25 @@ func Show(w io.Writer, path string, isURL bool) error {
 	if err != nil {
 		return err
 	}
+
 	pr, pw := io.Pipe()
 	go func() {
 		defer pw.Close()
 
 		wc := base64.NewEncoder(base64.StdEncoding, pw)
 
-		_, err := io.Copy(wc, content)
+		var reader io.Reader
+
+		switch content.(type) {
+		case *os.File:
+			defer content.(*os.File).Close()
+			reader = content.(*os.File)
+		case io.ReadCloser:
+			defer content.(io.ReadCloser).Close()
+			reader = content.(io.ReadCloser)
+		}
+
+		_, err := io.Copy(wc, reader)
 		if err != nil {
 			pw.CloseWithError(fmt.Errorf("😱 ~ Oops I could not encode the image to base64: %v", err.Error()))
 			return
@@ -48,15 +60,22 @@ func Show(w io.Writer, path string, isURL bool) error {
 }
 
 // Raw outputs the base64 encoded image the the os.Stdout
-func Raw(w io.Writer, path string) error {
-
-	f, err := open(path)
+func Raw(w io.Writer, path string, isURL bool) error {
+	var reader io.Reader
+	content, err := getContent(path, isURL)
 	if err != nil {
-		return fmt.Errorf("😱 ~ Oops I could not open the file: %v", err.Error())
+		return err
 	}
-	defer f.Close()
+	switch content.(type) {
+	case *os.File:
+		defer content.(*os.File).Close()
+		reader = content.(*os.File)
+	case io.ReadCloser:
+		defer content.(io.ReadCloser).Close()
+		reader = content.(io.ReadCloser)
+	}
 
-	encoded := getBase64(f)
+	encoded := getBase64(reader)
 
 	if _, err := fmt.Fprint(w, encoded); err != nil {
 		return fmt.Errorf("😱 ~ Oops I could not write the output to the os.Stdout..file a bug report 💁‍♀️\n%v", err.Error())
@@ -65,15 +84,24 @@ func Raw(w io.Writer, path string) error {
 }
 
 // Write writes the base64 of the image to the givin output file
-func Write(from, to string) error {
+func Write(from, to string, isURL bool) error {
+	var reader io.Reader
 
-	f, err := open(from)
+	content, err := getContent(from, isURL)
 	if err != nil {
-		return fmt.Errorf("😱 ~ Oops I could not open the file: %v", err.Error())
+		return err
 	}
-	defer f.Close()
 
-	base64 := strings.NewReader(getBase64(f))
+	switch content.(type) {
+	case *os.File:
+		defer content.(*os.File).Close()
+		reader = content.(*os.File)
+	case io.ReadCloser:
+		defer content.(io.ReadCloser).Close()
+		reader = content.(io.ReadCloser)
+	}
+
+	base64 := strings.NewReader(getBase64(reader))
 
 	outf, err := os.Create(to)
 	if err != nil {
@@ -90,15 +118,15 @@ func open(path string) (*os.File, error) {
 	return os.Open(path)
 }
 
-func getBase64(f *os.File) string {
+func getBase64(reader io.Reader) string {
 
-	r := bufio.NewReader(f)
+	r := bufio.NewReader(reader)
 	enc, _ := ioutil.ReadAll(r)
 	encoded := base64.StdEncoding.EncodeToString(enc)
 	return encoded
 }
 
-func getContent(path string, isURL bool) (io.Reader, error) {
+func getContent(path string, isURL bool) (interface{}, error) {
 	time.Sleep(5 * time.Second)
 	if !isURL {
 		f, err := open(path)

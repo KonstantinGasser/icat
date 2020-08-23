@@ -31,13 +31,13 @@ var writeCmd = &cobra.Command{
 	Short: "Writes the base64 of the image to the givien output file",
 	Long:  `not implemented yet`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		from, errF := cmd.Flags().GetString("select")
-		to, errT := cmd.Flags().GetString("output")
-		if from == "nil" || errF != nil || errT != nil {
-			return fmt.Errorf("🤨 ~ You messed up the command")
-			os.Exit(1)
+		from, err := cmd.Flags().GetString("select")
+		to, err := cmd.Flags().GetString("output")
+		isURL, err := cmd.Flags().GetBool("url")
+		if from == "nil" || err != nil {
+			return fmt.Errorf("🤨 ~ You messed up the command: %v", err.Error())
 		}
-		if err := internal.Write(from, to); err != nil {
+		if err := internal.Write(from, to, isURL); err != nil {
 			return err
 		}
 		fmt.Fprintf(os.Stdout, "🥳 ~ File with base64 of %s saved at %s", from, to)
@@ -52,4 +52,5 @@ func init() {
 	// default for outtput
 	outputDefault := strings.Join([]string{"./icat-", time.Now().String(), ".txt"}, "")
 	writeCmd.Flags().StringP("output", "o", outputDefault, "💾 Location of the outputfile including the file name,\nif not given icat-currentTime is the name of the file")
+	writeCmd.Flags().Bool("url", false, "🌐 If set fethes image from given URL")
 }

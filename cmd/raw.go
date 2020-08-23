@@ -30,11 +30,12 @@ var rawCmd = &cobra.Command{
 	Long:  `not implemented yet`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		path, err := cmd.Flags().GetString("select")
+		isURL, err := cmd.Flags().GetBool("url")
 		if err != nil || path == "nil" {
-			return fmt.Errorf("🤨 ~ You forgort to specify the path to the image")
-			os.Exit(1)
+			return fmt.Errorf("🤨 ~ You messed up the command: %v", err.Error())
+
 		}
-		if err := internal.Raw(os.Stdout, path); err != nil {
+		if err := internal.Raw(os.Stdout, path, isURL); err != nil {
 			return err
 		}
 		return nil
@@ -44,4 +45,5 @@ var rawCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(rawCmd)
 	rawCmd.Flags().StringP("select", "s", "nil", "📍Select location of the image")
+	rawCmd.Flags().Bool("url", false, "🌐 If set fethes image from given URL")
 }
