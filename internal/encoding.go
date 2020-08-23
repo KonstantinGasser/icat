@@ -141,5 +141,4 @@ func getContent(path string, isURL bool) (interface{}, error) {
 		return nil, fmt.Errorf("🤯 ~ Looks like something is wring with the URL or your network")
 	}
 	return resp.Body, nil
-	return nil, nil
 }
