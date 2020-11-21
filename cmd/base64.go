@@ -16,18 +16,22 @@ limitations under the License.
 package cmd
 
 import (
+	"encoding/base64"
 	"fmt"
+	"io"
 	"os"
 
-	"github.com/KonstantinGasser/icat/internal"
 	"github.com/spf13/cobra"
 )
 
-var path string
+var (
+	src string
+	out string
+)
 
-// viewCmd represents the view command
-var viewCmd = &cobra.Command{
-	Use:   "view",
+// base64Cmd represents the base64 command
+var base64Cmd = &cobra.Command{
+	Use:   "base64",
 	Short: "A brief description of your command",
 	Long: `A longer description that spans multiple lines and likely contains examples
 and usage of using your command. For example:
@@ -36,24 +40,41 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := internal.WriteView(os.Stdout, path); err != nil {
-			fmt.Printf("Could not view image: %s", err.Error())
+		f, err := os.Open(src)
+		if err != nil {
+			fmt.Printf("Could not open src file: %s", err.Error())
+			return
+		}
+		defer f.Close()
+
+		var w = os.Stdout
+		if out != "" {
+			w, err = os.Create(out)
+			if err != nil {
+				fmt.Printf("Could not create out file: %s", err.Error())
+				return
+			}
+			defer w.Close()
+		}
+		enc := base64.NewEncoder(base64.StdEncoding, w)
+		if _, err := io.Copy(enc, f); err != nil {
+			fmt.Printf("Cloud not write to writer: %s", err.Error())
 			return
 		}
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(viewCmd)
-	viewCmd.Flags().StringVarP(&path, "src", "s", "<not given>", "path to image")
-
+	rootCmd.AddCommand(base64Cmd)
+	base64Cmd.Flags().StringVarP(&src, "src", "s", "", "path from source file")
+	base64Cmd.Flags().StringVarP(&out, "out", "o", "", "write base64 of image to given output path")
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	// viewCmd.PersistentFlags().String("foo", "", "A help for foo")
+	// base64Cmd.PersistentFlags().String("foo", "", "A help for foo")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// viewCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	// base64Cmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
