@@ -30,7 +30,11 @@ func WriteView(dst io.Writer, src string) error {
 		// get base64 stream Writer
 		b64Stream := base64.NewEncoder(base64.StdEncoding, pipeWriter)
 		if _, err := io.Copy(b64Stream, f); err != nil {
-			fmt.Printf("Could not encode file to base64: %s", err.Error())
+			pipeWriter.CloseWithError(fmt.Errorf("Could not encode file to base64: %s", err.Error()))
+			return
+		}
+		if err := b64Stream.Close(); err != nil {
+			pipeWriter.CloseWithError(fmt.Errorf("Could not encode file to base64: %s", err.Error()))
 			return
 		}
 	}()

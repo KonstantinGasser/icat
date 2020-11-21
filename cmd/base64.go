@@ -68,13 +68,5 @@ func init() {
 	rootCmd.AddCommand(base64Cmd)
 	base64Cmd.Flags().StringVarP(&src, "src", "s", "", "path from source file")
 	base64Cmd.Flags().StringVarP(&out, "out", "o", "", "write base64 of image to given output path")
-	// Here you will define your flags and configuration settings.
 
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// base64Cmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// base64Cmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
