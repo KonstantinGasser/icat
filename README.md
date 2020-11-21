@@ -7,4 +7,4 @@ view images on your terminal (applies only to iTerm users).
 `$ icat view -s path/to/image`
 
 ## Touch and feel
-![](resources/icat_demo.git)
+![](resources/icat_demo.gif)
