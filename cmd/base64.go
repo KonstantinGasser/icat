@@ -32,13 +32,8 @@ var (
 // base64Cmd represents the base64 command
 var base64Cmd = &cobra.Command{
 	Use:   "base64",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "base64 takes a src file and an out path. It encodes the file to base64 and writes it to the out file.",
+	Long:  `If the --out is not given the base64 of the file gets printed to the command line`,
 	Run: func(cmd *cobra.Command, args []string) {
 		f, err := os.Open(src)
 		if err != nil {
