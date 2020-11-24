@@ -40,8 +40,29 @@ func WriteView(dst io.Writer, src string) error {
 	}()
 
 	// final copy to the passed io.Writer
-	if _, err := io.Copy(dst, io.MultiReader(initLine, pipeReader, finishLine)); err != nil {
-		return fmt.Errorf("Could not view src: %s", err.Error())
+	if err := renderBase64(dst, pipeReader); err != nil {
+		return err
+	}
+	return nil
+}
+
+func RenderFromBase64(dst io.Writer, src string) error {
+	f, err := os.Open(src)
+	if err != nil {
+		return fmt.Errorf("Could not open file %s:%s", src, err.Error())
+	}
+	defer f.Close()
+
+	if err := renderBase64(dst, f); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func renderBase64(dst io.Writer, src io.Reader) error {
+	if _, err := io.Copy(dst, io.MultiReader(initLine, src, finishLine)); err != nil {
+		return fmt.Errorf("Could not render image: %s", err.Error())
 	}
 	return nil
 }

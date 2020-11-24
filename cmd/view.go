@@ -23,7 +23,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var path string
+var (
+	path     string
+	isBase64 bool
+)
 
 // viewCmd represents the view command
 var viewCmd = &cobra.Command{
@@ -31,6 +34,14 @@ var viewCmd = &cobra.Command{
 	Short: "use view to render a image on the command line",
 	Long:  "",
 	Run: func(cmd *cobra.Command, args []string) {
+		if isBase64 {
+			if err := internal.RenderFromBase64(os.Stdout, path); err != nil {
+				fmt.Errorf("Cloud not view image: %s", err.Error())
+				return
+			}
+			return
+		}
+
 		if err := internal.WriteView(os.Stdout, path); err != nil {
 			fmt.Printf("Could not view image: %s", err.Error())
 			return
@@ -41,4 +52,5 @@ var viewCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(viewCmd)
 	viewCmd.Flags().StringVarP(&path, "src", "s", "<not given>", "path to image")
+	viewCmd.Flags().BoolVarP(&isBase64, "base64", "b", false, "use if file is base64 encoded")
 }
