@@ -24,7 +24,6 @@ import (
 )
 
 var (
-	path     string
 	isBase64 bool
 )
 
@@ -34,6 +33,7 @@ var viewCmd = &cobra.Command{
 	Short: "use view to render a image in the command line",
 	Long:  "",
 	Run: func(cmd *cobra.Command, args []string) {
+		path := os.Args[2]
 		if isBase64 {
 			if err := internal.RenderFromBase64(os.Stdout, path); err != nil {
 				fmt.Printf("Cloud not view image: %s", err.Error())
@@ -51,6 +51,5 @@ var viewCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(viewCmd)
-	viewCmd.Flags().StringVarP(&path, "src", "s", "<not given>", "path to image")
 	viewCmd.Flags().BoolVarP(&isBase64, "base64", "b", false, "use if file is a image in base64")
 }

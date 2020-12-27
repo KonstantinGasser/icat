@@ -25,7 +25,7 @@ import (
 )
 
 var (
-	src string
+	// src string
 	out string
 )
 
@@ -35,6 +35,7 @@ var base64Cmd = &cobra.Command{
 	Short: "base64 takes a src file and an out path. It encodes the file to base64 and writes it to the out file.",
 	Long:  `If the --out is not given the base64 of the file gets printed to the command line`,
 	Run: func(cmd *cobra.Command, args []string) {
+		src := os.Args[2]
 		f, err := os.Open(src)
 		if err != nil {
 			fmt.Printf("Could not open src file: %s", err.Error())
@@ -61,7 +62,7 @@ var base64Cmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(base64Cmd)
-	base64Cmd.Flags().StringVarP(&src, "src", "s", "", "path from source file")
+	// base64Cmd.Flags().StringVarP(&src, "src", "s", "", "path from source file")
 	base64Cmd.Flags().StringVarP(&out, "out", "o", "", "write base64 of image to given output path")
 
 }
