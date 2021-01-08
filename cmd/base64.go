@@ -16,53 +16,71 @@ limitations under the License.
 package cmd
 
 import (
-	"encoding/base64"
 	"fmt"
-	"io"
 	"os"
+	"strings"
 
 	"github.com/spf13/cobra"
 )
 
 var (
-	// src string
 	out string
 )
 
 // base64Cmd represents the base64 command
 var base64Cmd = &cobra.Command{
 	Use:   "base64",
-	Short: "base64 takes a src file and an out path. It encodes the file to base64 and writes it to the out file.",
+	Short: "convert image file to base64 text files",
 	Long:  `If the --out is not given the base64 of the file gets printed to the command line`,
 	Run: func(cmd *cobra.Command, args []string) {
-		src := os.Args[2]
-		f, err := os.Open(src)
-		if err != nil {
-			fmt.Printf("Could not open src file: %s", err.Error())
+		// check for src path
+		if len(os.Args) < 2 {
+			fmt.Printf("you forgot to provide a src path to an image or base64 text file")
 			return
 		}
-		defer f.Close()
 
-		var w = os.Stdout
+		src := os.Args[2]
+
+		// fetch content from image
+		target, err := resource.Open(src)
+		if err != nil {
+			fmt.Printf("%s\n", err.Error())
+			return
+		}
+		defer target.Close()
+
+		// encode image to bas64 and pipe it to the io.Pipe
+		// encoder.Copy triggers a goroutine to pipe the data from the encoder stream to
+		// the pipeWriter
+		pipeReader := encoder.Copy(encoder.Stream, target)
+
+		// check if output path is given
 		if out != "" {
-			w, err = os.Create(out)
+			outF, err := os.Create(out)
 			if err != nil {
-				fmt.Printf("Could not create out file: %s", err.Error())
+				fmt.Printf("cloud not create out put file at:%s :%s\n", out, err.Error())
 				return
 			}
-			defer w.Close()
+			// copy base64 of an image to a given output file
+			if err := resource.Copy(outF, pipeReader); err != nil {
+				fmt.Printf("could not copy content to file: %s\n", err.Error())
+				return
+			}
 		}
-		enc := base64.NewEncoder(base64.StdEncoding, w)
-		if _, err := io.Copy(enc, f); err != nil {
-			fmt.Printf("Cloud not write to writer: %s", err.Error())
-			return
+
+		// no output path given: print to terminal
+		if out == "" {
+			if err := resource.MultiCopy(os.Stdout, pipeReader, strings.NewReader("\n")); err != nil {
+				fmt.Printf("could not copy content to os.Stdout: %s\n", err.Error())
+				return
+			}
+			// force new line after content is printed
+			fmt.Println()
 		}
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(base64Cmd)
-	// base64Cmd.Flags().StringVarP(&src, "src", "s", "", "path from source file")
 	base64Cmd.Flags().StringVarP(&out, "out", "o", "", "write base64 of image to given output path")
-
 }

@@ -9,4 +9,4 @@ view images on your terminal (applies only to iTerm users).
 `$ icat base64 --src path/to/image --out path/to/output` -> writes in output file
 
 ## Touch and feel
-![](resources/icat_demo.gif)
+![](git_resources/icat_demo.gif)

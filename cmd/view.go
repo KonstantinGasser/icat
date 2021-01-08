@@ -19,7 +19,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/KonstantinGasser/icat/internal"
 	"github.com/spf13/cobra"
 )
 
@@ -30,26 +29,49 @@ var (
 // viewCmd represents the view command
 var viewCmd = &cobra.Command{
 	Use:   "view",
-	Short: "use view to render a image in the command line",
-	Long:  "",
+	Short: "view allows you to render images in your iTerm terminal",
+	Long:  "view allows you to render images in your iTerm terminal. The file can either be an image or a text file containing base64",
 	Run: func(cmd *cobra.Command, args []string) {
-		path := os.Args[2]
-		if isBase64 {
-			if err := internal.RenderFromBase64(os.Stdout, path); err != nil {
-				fmt.Printf("Cloud not view image: %s", err.Error())
-				return
-			}
+		// check for src path
+		if len(os.Args) < 2 {
+			fmt.Printf("you forgot to provide a src path to an image or base64 text file")
 			return
 		}
 
-		if err := internal.WriteView(os.Stdout, path); err != nil {
-			fmt.Printf("Could not view image: %s", err.Error())
+		src := os.Args[2]
+
+		// fetch content from image
+		target, err := resource.Open(src)
+		if err != nil {
+			fmt.Printf("%s\n", err.Error())
+			return
+		}
+		defer target.Close()
+
+		// content of file is already in base64
+		if isBase64 {
+			if err := resource.MultiCopy(os.Stdout, iTermCmdStartRender, target, iTermCmdStopRender); err != nil {
+				fmt.Printf("%s\n", err.Error())
+				return
+			}
+		}
+
+		// encode image to bas64 and pipe it to the io.Pipe
+		// encoder.Copy triggers a goroutine to pipe the data from the encoder stream to
+		// the pipeWriter
+		pipeReader := encoder.Copy(encoder.Stream, target)
+
+		// copy starting and stop command and base64 image conntent
+		// to os.Stdout (iTerm window)
+		if err := resource.MultiCopy(os.Stdout, iTermCmdStartRender, pipeReader, iTermCmdStopRender); err != nil {
+			fmt.Printf("%s\n", err.Error())
 			return
 		}
 	},
 }
 
 func init() {
+
 	rootCmd.AddCommand(viewCmd)
-	viewCmd.Flags().BoolVarP(&isBase64, "base64", "b", false, "use if file is a image in base64")
+	viewCmd.Flags().BoolVarP(&isBase64, "base64", "b", false, "use if image is in base64")
 }
