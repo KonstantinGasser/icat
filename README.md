@@ -11,4 +11,4 @@ render images in you iTerm window or copy the base64 string of an image to a out
 `$ icat base64 path/to/image --out path/to/output` -> write base64 of image to output file
 
 ## Touch and feel
-![](git_resources/icat_demo.gif)
+![](git_resources/icat-demo.gif)
