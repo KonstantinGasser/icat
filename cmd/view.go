@@ -19,10 +19,14 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/KonstantinGasser/icat/resources"
 	"github.com/spf13/cobra"
 )
 
 var (
+	// user     string
+	// host     string
+	// port     int
 	isBase64 bool
 )
 
@@ -32,13 +36,25 @@ var viewCmd = &cobra.Command{
 	Short: "view allows you to render images in your iTerm terminal",
 	Long:  "view allows you to render images in your iTerm terminal. The file can either be an image or a text file containing base64",
 	Run: func(cmd *cobra.Command, args []string) {
+		var src string
+		var resource resources.Resource
+
 		// check for src path
 		if len(os.Args) < 2 {
 			fmt.Printf("you forgot to provide a src path to an image or base64 text file")
 			return
 		}
 
-		src := os.Args[2]
+		src = os.Args[2]
+
+		// TODO: change code to be clear!
+		// determine which resource is required
+		if string(src[0:4]) == "http" || string(src[0:5]) == "https" {
+			resource = resources.NewNetConn()
+		} else {
+			resource = resources.NewFile()
+		}
+		defer resource.Close()
 
 		// fetch content from image
 		target, err := resource.Open(src)
@@ -46,11 +62,10 @@ var viewCmd = &cobra.Command{
 			fmt.Printf("%s\n", err.Error())
 			return
 		}
-		defer target.Close()
 
 		// content of file is already in base64
 		if isBase64 {
-			if err := resource.MultiCopy(os.Stdout, iTermCmdStartRender, target, iTermCmdStopRender); err != nil {
+			if err := stdout.MultiCopy(os.Stdout, iTermCmdStartRender, target, iTermCmdStopRender); err != nil {
 				fmt.Printf("%s\n", err.Error())
 				return
 			}
@@ -63,7 +78,7 @@ var viewCmd = &cobra.Command{
 
 		// copy starting and stop command and base64 image conntent
 		// to os.Stdout (iTerm window)
-		if err := resource.MultiCopy(os.Stdout, iTermCmdStartRender, pipeReader, iTermCmdStopRender); err != nil {
+		if err := stdout.MultiCopy(os.Stdout, iTermCmdStartRender, pipeReader, iTermCmdStopRender); err != nil {
 			fmt.Printf("%s\n", err.Error())
 			return
 		}
@@ -73,5 +88,10 @@ var viewCmd = &cobra.Command{
 func init() {
 
 	rootCmd.AddCommand(viewCmd)
+
+	// flags for sftp access
+	// viewCmd.Flags().StringVarP(&user, "user", "u", "", "user name for remote server")
+	// viewCmd.Flags().StringVarP(&host, "host", "H", "", "hostname of remote server")
+	// viewCmd.Flags().IntVarP(&port, "port", "p", 22, "sft port for remote server (default 22)")
 	viewCmd.Flags().BoolVarP(&isBase64, "base64", "b", false, "use if image is in base64")
 }

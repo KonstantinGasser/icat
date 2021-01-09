@@ -25,15 +25,17 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var version = "1.0.0"
+var version = "1.0.1"
 
 const (
-	ENV_iTerm_KEY   = "TERM_PROGRAM"
+	// ENV_iTerm_KEY environment variable to tell wich terminal app is used
+	ENV_iTerm_KEY = "TERM_PROGRAM"
+	// ENV_iTerm_VALUE value telling iTerm terminal is used to execute icat command
 	ENV_iTerm_VALUE = "iTerm.app"
 )
 
 var (
-	resource            resources.File
+	stdout              resources.StdOut
 	encoder             b64.Encoder
 	iTermCmdStartRender = strings.NewReader("\033]1337;File=inline=1:")
 	iTermCmdStopRender  = strings.NewReader("\a\n") // \n to force terminal to do new line
@@ -67,6 +69,6 @@ func init() {
 
 	// init deps
 	// deps are accessable for all cmds!
-	resource = resources.NewResource()
+	stdout = resources.NewStdOut()
 	encoder = b64.NewEncoder()
 }

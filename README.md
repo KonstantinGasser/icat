@@ -6,9 +6,11 @@ render images in you iTerm window or copy the base64 string of an image to a out
 
 ## Usage
 `$ icat view path/to/image` -> display image in terminal window<br>
+`$ icat view https://somepage.com/awesome_image` -> path can also be URL<br>
 `$ icat view path/to/image --base64` -> display base64 text file as rendered image in terminal window<br>
-`$ icat base64 path/to/image` ->write base64 of image to terminal (not quite useful I know)<br>
+`$ icat base64 path/to/image` -> write base64 of image to terminal (not quite useful I know)<br>
 `$ icat base64 path/to/image --out path/to/output` -> write base64 of image to output file
+`$ icat view username@server:/home/username/img.png -p`
 
 ## Touch and feel
 ![](git_resources/icat-demo.gif)
