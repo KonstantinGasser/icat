@@ -24,9 +24,8 @@ import (
 )
 
 var (
-	// user     string
-	// host     string
-	// port     int
+	port     int
+	remote   bool
 	isBase64 bool
 )
 
@@ -51,6 +50,8 @@ var viewCmd = &cobra.Command{
 		// determine which resource is required
 		if string(src[0:4]) == "http" || string(src[0:5]) == "https" {
 			resource = resources.NewNetConn()
+		} else if remote {
+			resource = resources.NewSFTP(port)
 		} else {
 			resource = resources.NewFile()
 		}
@@ -90,8 +91,7 @@ func init() {
 	rootCmd.AddCommand(viewCmd)
 
 	// flags for sftp access
-	// viewCmd.Flags().StringVarP(&user, "user", "u", "", "user name for remote server")
-	// viewCmd.Flags().StringVarP(&host, "host", "H", "", "hostname of remote server")
-	// viewCmd.Flags().IntVarP(&port, "port", "p", 22, "sft port for remote server (default 22)")
+	viewCmd.Flags().IntVarP(&port, "port", "p", 22, "if remote acces provide port sftp opn server (default: 22)")
+	viewCmd.Flags().BoolVarP(&remote, "remote", "R", false, "allows to access remote file via user@server:/path/to/image")
 	viewCmd.Flags().BoolVarP(&isBase64, "base64", "b", false, "use if image is in base64")
 }
