@@ -120,6 +120,7 @@ func (c *sftpclient) verifyHost(host string) error {
 	return fmt.Errorf("could not find any known host in $HOME/.ssh/known_hosts for %s", host)
 }
 
+// TODO: move to StdOu Resource
 // Password handels users password input
 func getPassword() (string, error) {
 
