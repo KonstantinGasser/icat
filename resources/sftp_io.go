@@ -34,18 +34,18 @@ func (c *sftpclient) Open(src string) (io.Reader, error) {
 	// TODO: peforme error checking for src string
 	// spilt user@server:/path/to/image -> user@server, /path/to/image
 	parts := strings.Split(src, ":")
-	fmt.Println(parts)
+	
 	// split user@server -> user, server
 	credentials := strings.Split(parts[0], "@")
 	user, host = credentials[0], credentials[1]
-
 	remoteAddr = fmt.Sprintf("%s:%d", host, c.port)
-
-	// path can contain : like /path/to:some/image
+	
+	// TODO: put in extra func test with test cases
+	// path can contain : /path/to:some/image -> will parts will then contain [..., /path/to, some/image,...]
 	// join spilt fields in path back again
 	imgPath = parts[1]
-	if len(parts[1:]) > 1 {
-		imgPath = path.Join(parts[1:]...)
+	if len(parts[1:]) > 1 { 
+		imgPath = path.Join(parts[1:]...) // this is wrong!!!
 	}
 
 	// check if requests host is in known_hosts
@@ -65,12 +65,13 @@ func (c *sftpclient) Open(src string) (io.Reader, error) {
 		},
 		HostKeyCallback: ssh.FixedHostKey(c.publicKey),
 	}
-	// set sshConn to client so ssh connection can later be closed after use
+	// set sshConn at client so ssh connection can later be closed after use
 	c.sshConn, err = ssh.Dial("tcp", remoteAddr, config)
 	if err != nil {
 		return nil, err
 	}
-
+	
+	// set sftpClient at client so client can later be closed after use
 	c.sftpClient, err = sftp.NewClient(c.sshConn)
 	if err != nil {
 		return nil, err
