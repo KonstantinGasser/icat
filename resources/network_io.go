@@ -14,7 +14,7 @@ type netconn struct {
 	resp *http.Response
 }
 
-// HTTPRequest calles the requested URL for an image. if successful returns the *Response
+// Open calles the requested URL for an image. if successful returns the *Response
 // else an error
 func (conn *netconn) Open(src string) (io.Reader, error) {
 

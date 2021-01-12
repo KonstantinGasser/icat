@@ -29,27 +29,16 @@ func NewSFTP(port int) Resource {
 }
 
 func (c *sftpclient) Open(src string) (io.Reader, error) {
-	var imgPath, user, host, remoteAddr string
+	var remoteAddr string
 
-	// TODO: peforme error checking for src string
-	// spilt user@server:/path/to/image -> user@server, /path/to/image
-	parts := strings.Split(src, ":")
-	
-	// split user@server -> user, server
-	credentials := strings.Split(parts[0], "@")
-	user, host = credentials[0], credentials[1]
-	remoteAddr = fmt.Sprintf("%s:%d", host, c.port)
-	
-	// TODO: put in extra func test with test cases
-	// path can contain : /path/to:some/image -> will parts will then contain [..., /path/to, some/image,...]
-	// join spilt fields in path back again
-	imgPath = parts[1]
-	if len(parts[1:]) > 1 { 
-		imgPath = path.Join(parts[1:]...) // this is wrong!!!
+	user, host, imgPath, err := parseSrc(src)
+	if err != nil {
+		return nil, err
 	}
+	remoteAddr = fmt.Sprintf("%s:%d", host, c.port)
 
 	// check if requests host is in known_hosts
-	if err := c.verifyHost(credentials[1]); err != nil {
+	if err := c.verifyHost(host); err != nil {
 		return nil, err
 	}
 
@@ -70,7 +59,7 @@ func (c *sftpclient) Open(src string) (io.Reader, error) {
 	if err != nil {
 		return nil, err
 	}
-	
+
 	// set sftpClient at client so client can later be closed after use
 	c.sftpClient, err = sftp.NewClient(c.sshConn)
 	if err != nil {
@@ -118,6 +107,35 @@ func (c *sftpclient) verifyHost(host string) error {
 	}
 
 	return fmt.Errorf("could not find any known host in $HOME/.ssh/known_hosts for %s", host)
+}
+
+func parseSrc(src string) (user, host, imgPath string, err error) {
+	// src is tagen from os.Args[2] -> if --remote set before the src
+	// os.Args[2] == --remote
+	if strings.Contains(src, "--remote") {
+		err = fmt.Errorf("--remote flag must be set at the end of the command (icat view <src> --remote)")
+		return "", "", "", err
+	}
+
+	// user@server:/path/to/image -> user@server, /path/to/image
+	split := strings.Split(src, ":")
+
+	// parese user, server: user@server -> user, server
+	credentials := strings.Split(split[0], "@")
+	if len(credentials) < 2 {
+		err = fmt.Errorf("you need to provide both, user and server in the form of user@server")
+		return "", "", "", err
+	}
+	user, host = credentials[0], credentials[1]
+
+	// path of image can containe colon i.ex /path/to:some/image
+	// join path back together (split created due to first spilit)
+	imgPath = split[1]
+	if len(split[1:]) > 1 {
+		imgPath = strings.Join(split[1:], ":")
+	}
+
+	return user, host, imgPath, nil
 }
 
 // TODO: move to StdOu Resource
