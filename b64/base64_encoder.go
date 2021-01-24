@@ -33,8 +33,10 @@ func (enc *b64Encoder) Copy(stream func(dst io.Writer) io.WriteCloser, src io.Re
 	go func() {
 		defer pipeW.Close()
 
-		// pipe the content from the src to the stream
+		// pipe the content from the src to the encoder stream
 		streamer := stream(pipeW)
+		
+		// read from encoder stream and pipe to pipewrtier
 		if _, err := io.Copy(streamer, src); err != nil {
 			pipeW.CloseWithError(fmt.Errorf("could not stream base64 content to pipeWriter: %s", err.Error()))
 			return
