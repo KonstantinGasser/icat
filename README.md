@@ -2,7 +2,8 @@
 
 ## iCat
 render images in you iTerm window or copy the base64 string of an image to a output file.
-<br>(You could also print the base64 to the iTerm, in case you want to ??)
+<br>(You could also print the base64 to the iTerm, in case you want to ??)<br>
+inspired by Francesc Campoy and his video on io.Pipes.  
 
 ## Usage
 `$ icat view path/to/image` -> display image in terminal window<br>
