@@ -17,7 +17,6 @@ func showImage(resource resources.Resource) error {
 	if err != nil {
 		return fmt.Errorf("could not open resource: %v", err)
 	}
-	fmt.Println("In show")
 	// pipe resource content through encoder-stream and pipeWriter
 	pipeR := stream.Pipe(content, stream.Base64)
 	if _, err := Copy(os.Stdout, iTermCmdStartRender, pipeR, iTermCmdStopRender); err != nil {

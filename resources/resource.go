@@ -1,7 +1,6 @@
 package resources
 
 import (
-	"fmt"
 	"io"
 	"strings"
 )
@@ -20,40 +19,24 @@ type Resource interface {
 	Open() (io.Reader, func(), error)
 }
 
-// resource can look like:
-// 1) /path/to/image -> from local file system
-// 		-> image_path
-//		exceptions:
-//			- path/to:image -> look out for colon in path - re-join path
-// 2) http(s)://www.images.com/my_image -> http resource
-// 		-> protocol, URL
-//		exceptions:
-//			- check for https or http protocol
-// 3) sftp:user@host:/path/to/image -> sftp resource
-//		-> protocol, user, host, path
-// 		exceptions:
-//			- path/to:image -> look out for colon in path - re-join path
-//			- sftp:user@host:post:/path/to/image -> port can be provided check for host-colon-port
-func Get(src string) (Resource, error) {
-	// var protocol int
-	// src: options
-	// /path/to/image
-	// http(s)://www.images.com/my_image
-	// sftp:user@host:/path/to/image
+// New returns based on the src the correct resource to handle the request
+// support for http/https, sftp, local-file-system (default)
+func New(src string) (Resource, error) {
 
 	splitSet := strings.Split(src, ":")
-	// 1) check for protocol
+	// http/https, sftp, -
+	prefix := splitSet[0]
+	mergedSrc := strings.Join(splitSet[0:], ":")
 	switch true {
-	case (splitSet[0] == "http" || splitSet[0] == "https"):
-		fmt.Println("Protocol: HTTP(S)")
-	case (splitSet[0] == "sftp"):
-		fmt.Println("Protocol: STFP")
+	// src of image is URL
+	case (prefix == "http" || prefix == "https"):
+		return NetConnHTTP{src: mergedSrc}, nil
+	// src of image is SFTP request
+	case (prefix == "sftp"):
+		panic("get resource SFTP - not implemented")
+	// default use local file system to open image
 	default:
-		fmt.Println("Protocol: LocalFile")
-		// in case the path looks like (path/to:some/image)
-		// re-join the path in order to not mess up the original path
-		filePath := strings.Join(splitSet[0:], ":")
-		return LocalFile{path: filePath}, nil
+		return LocalFile{src: mergedSrc}, nil
 	}
-	return nil, fmt.Errorf("could not find a suitable resource for: %s", src)
+
 }
