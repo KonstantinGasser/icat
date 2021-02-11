@@ -1,7 +1,6 @@
 package resources
 
 import (
-	"reflect"
 	"testing"
 
 	"github.com/matryer/is"
@@ -26,13 +25,16 @@ func TestGet(t *testing.T) {
 		resource, err := New(tc.src)
 		is.NoErr(err)
 
-		if reflect.TypeOf(tc.kind) == reflect.TypeOf(LocalFile{}) {
-			lf, ok := resource.(LocalFile)
-			if !ok {
-				t.Errorf("returned resource dose not match expected type of test-case")
-			}
+		switch tc.kind.(type) {
+		case LocalFile:
+			lf := resource.(LocalFile)
 			is.Equal(lf.src, tc.excpected)
-		}
+		case NetConnHTTP:
+			conn := resource.(NetConnHTTP)
+			is.Equal(conn.src, tc.excpected)
+		default:
+			t.Errorf("no valid resource returned by resources.New(src)")
 
+		}
 	}
 }
