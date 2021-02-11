@@ -19,10 +19,11 @@ func TestGet(t *testing.T) {
 	}{
 		{kind: LocalFile{}, src: "./path/to/image", excpected: "./path/to/image"},
 		{kind: LocalFile{}, src: "/path/to:some/image", excpected: "/path/to:some/image"},
+		{kind: NetConnHTTP{}, src: "https://www.pinclipart.com/picdir/middle/571-5718168_go-gopher-stickers-clipart.png", excpected: "https://www.pinclipart.com/picdir/middle/571-5718168_go-gopher-stickers-clipart.png"},
 	}
 
 	for _, tc := range tt {
-		resource, err := Get(tc.src)
+		resource, err := New(tc.src)
 		is.NoErr(err)
 
 		if reflect.TypeOf(tc.kind) == reflect.TypeOf(LocalFile{}) {
