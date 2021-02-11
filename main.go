@@ -10,6 +10,8 @@ import (
 )
 
 const (
+	// icat version
+	version = "1.0.0"
 	// ENV_iTerm_KEY environment variable to tell which terminal app is used
 	ENV_iTerm_KEY = "TERM_PROGRAM"
 	// ENV_iTerm_VALUE value telling iTerm terminal is used to execute icat command
@@ -28,6 +30,11 @@ func main() {
 	displayBase64 := flag.Bool("base64", false, "display base64 encoding of image")
 	writeBase64 := flag.String("out", "", "write base64 encoding of image to file")
 	flag.Parse()
+
+	if os.Args[1] == "version" {
+		fmt.Printf("icat version: %s\n", version)
+		return
+	}
 
 	imagePath := os.Args[len(os.Args)-1]
 	resource, err := resources.New(imagePath)

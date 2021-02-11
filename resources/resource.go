@@ -26,17 +26,17 @@ func New(src string) (Resource, error) {
 	splitSet := strings.Split(src, ":")
 	// http/https, sftp, -
 	prefix := splitSet[0]
-	mergedSrc := strings.Join(splitSet[0:], ":")
+	imageSrc := strings.Join(splitSet[0:], ":")
 	switch true {
 	// src of image is URL
 	case (prefix == "http" || prefix == "https"):
-		return NetConnHTTP{src: mergedSrc}, nil
+		return NetConnHTTP{src: imageSrc}, nil
 	// src of image is SFTP request
 	case (prefix == "sftp"):
 		panic("get resource SFTP - not implemented")
-	// default use local file system to open image
+	// default use local file system to open src
 	default:
-		return LocalFile{src: mergedSrc}, nil
+		return LocalFile{src: imageSrc}, nil
 	}
 
 }
