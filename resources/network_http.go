@@ -22,7 +22,6 @@ func (conn NetConnHTTP) Open() (io.Reader, func(), error) {
 	cleanup := func() {
 		if resp != nil && resp.Body != nil {
 			resp.Body.Close()
-
 		}
 	}
 	if resp.StatusCode != http.StatusOK {
