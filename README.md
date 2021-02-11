@@ -12,6 +12,7 @@ inspired by Francesc Campoy and his video on io.Pipes.
 - `$ icat -base64 path/to/image` -> write base64 of image to terminal (not quite useful I know)
 - `$ icat -base64 -out path/to/output path/to/image` -> write base64 of image to output file
 
- 
+<!-- 
 ## Touch and feel
 ![](git_resources/icat-demo.gif)
+-->
