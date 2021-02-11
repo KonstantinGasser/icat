@@ -12,7 +12,7 @@ type NetConnHTTP struct {
 	src string
 }
 
-// Open calls a given url returns the response.Body content, a cleanup function
+// Open calls a given url returns the response.Body and a cleanup function
 // to close the resource
 func (conn NetConnHTTP) Open() (io.Reader, func(), error) {
 	resp, err := http.Get(conn.src)
@@ -22,7 +22,6 @@ func (conn NetConnHTTP) Open() (io.Reader, func(), error) {
 	cleanup := func() {
 		if resp != nil && resp.Body != nil {
 			resp.Body.Close()
-
 		}
 	}
 	if resp.StatusCode != http.StatusOK {
