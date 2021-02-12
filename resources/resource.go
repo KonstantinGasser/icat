@@ -33,7 +33,12 @@ func New(src string) (Resource, error) {
 		return NetConnHTTP{src: imageSrc}, nil
 	// src of image is SFTP request
 	case (prefix == "sftp"):
-		panic("get resource SFTP - not implemented")
+		sftpConn := NetConnSFTP{}
+		// exclude "sftp://"
+		if err := sftpConn.resolve(imageSrc[7:]); err != nil {
+			return nil, err
+		}
+		return sftpConn, nil
 	// default use local file system to open src
 	default:
 		return LocalFile{src: imageSrc}, nil
