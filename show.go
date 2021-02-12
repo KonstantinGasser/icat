@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/KonstantinGasser/icat/resources"
-	"github.com/KonstantinGasser/icat/stream"
+	"github.com/KonstantinGasser/icat/pkg/resources"
+	"github.com/KonstantinGasser/icat/pkg/stream"
 )
 
-func showImage(resource resources.Resource) error {
+func printImage(resource resources.Resource) error {
 	// request to open file from resource
 	content, teardown, err := resource.Open()
 	// teardown holds resource specific instructions on how to close

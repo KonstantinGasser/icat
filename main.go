@@ -6,12 +6,12 @@ import (
 	"os"
 	"strings"
 
-	"github.com/KonstantinGasser/icat/resources"
+	"github.com/KonstantinGasser/icat/pkg/resources"
 )
 
 const (
 	// icat version
-	version = "1.0.0"
+	version = "0.0.1"
 	// ENV_iTerm_KEY environment variable to tell which terminal app is used
 	ENV_iTerm_KEY = "TERM_PROGRAM"
 	// ENV_iTerm_VALUE value telling iTerm terminal is used to execute icat command
@@ -49,7 +49,7 @@ func main() {
 		fallthrough
 	case (*writeBase64 != ""): // write base64 of image to given output file
 	default: // display image in iTerm window
-		if err := showImage(resource); err != nil {
+		if err := printImage(resource); err != nil {
 			fmt.Println(err)
 			return
 		}
