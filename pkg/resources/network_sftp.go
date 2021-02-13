@@ -16,13 +16,13 @@ const (
 	regexUserHostPort = "(^\\w+@\\w+:[0-9]{1,1000})"
 	// regexUserHost regex for: user@host
 	regexUserHost = "(^\\w+@[a-zA-Z]*)"
-	//	regexUserIP regex for: user@ip
+	// regexUserIP regex for: user@ip
 	regexUserIP = "(^\\w+@(?:[0-9]{1,3}\\.){3}[0-9]{1,3})"
 	// regexUserIPPort regex for: user@ip:port
 	regexUserIPPort = "(^\\w+@(?:[0-9]{1,3}\\.){3}[0-9]{1,3}:[0-9]{1,1000})"
 )
 
-// NetConnSFTP handles images requested from a remote sever
+// NetConnSFTP handles images requested for a remote sever access
 type NetConnSFTP struct {
 	user, host, port, src string
 }
@@ -39,11 +39,11 @@ func (conn *NetConnSFTP) resolve(src string) error {
 	if connBytes == nil {
 		return fmt.Errorf("could not identify the components (user,host,port) in %s", src)
 	}
-	// -> [user, host:port]
+	// user@host:port -> [user, host:port]
 	userSplitSet := strings.Split(string(connBytes), "@")
-	// -> [host, port]
+	// host:port -> [host, port]
 	hostPortSpiltSet := strings.Split(userSplitSet[1], ":")
-	// -> [user@host:port, /path/to/image]
+	// user@host:port/path/to/image -> [user@host:port, /path/to/image]
 	imageSrc := strings.Split(src, string(connBytes))[1]
 
 	conn.user = userSplitSet[0]
