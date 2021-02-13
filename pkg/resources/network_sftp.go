@@ -10,6 +10,18 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
+const (
+	defaultPort = "22"
+	// regexUserHostPort regex for: user@host:port
+	regexUserHostPort = "(^\\w+@\\w+:[0-9]{1,1000})"
+	// regexUserHost regex for: user@host
+	regexUserHost = "(^\\w+@[a-zA-Z]*)"
+	//	regexUserIP regex for: user@ip
+	regexUserIP = "(^\\w+@(?:[0-9]{1,3}\\.){3}[0-9]{1,3})"
+	// regexUserIPPort regex for: user@ip:port
+	regexUserIPPort = "(^\\w+@(?:[0-9]{1,3}\\.){3}[0-9]{1,3}:[0-9]{1,1000})"
+)
+
 // NetConnSFTP handles images requested from a remote sever
 type NetConnSFTP struct {
 	user, host, port, src string
@@ -17,7 +29,12 @@ type NetConnSFTP struct {
 
 func (conn *NetConnSFTP) resolve(src string) error {
 	// match user@hostname:port | user@ip.address:port in src string
-	re := regexp.MustCompile("^\\S+@\\S+:[0-9]{1,6}")
+	re := regexp.MustCompile(fmt.Sprintf("%s|%s|%s|%s",
+		regexUserHostPort,
+		regexUserIPPort,
+		regexUserIP,
+		regexUserHost,
+	))
 	connBytes := re.Find([]byte(src))
 	if connBytes == nil {
 		return fmt.Errorf("could not identify the components (user,host,port) in %s", src)
@@ -31,7 +48,10 @@ func (conn *NetConnSFTP) resolve(src string) error {
 
 	conn.user = userSplitSet[0]
 	conn.host = hostPortSpiltSet[0]
-	conn.port = hostPortSpiltSet[1]
+	conn.port = defaultPort
+	if len(hostPortSpiltSet) > 1 {
+		conn.port = hostPortSpiltSet[1]
+	}
 	conn.src = imageSrc
 	return nil
 }
