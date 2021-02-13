@@ -6,7 +6,7 @@ have you ever been in the situation where you have an image on a server and don'
 ## Usage
 - `$ icat path/to/image` -> display image in terminal window<br>
 - `$ icat https://somepage.com/awesome_image` -> path can also be URL<br>
-- `$ icat sftp://username@server:22/home/username/img.png` -> display image from remote server (default port is 22)
+- `$ icat sftp://username@server:1024/home/username/img.png` -> display image from remote server (default port is 22)
 - `$ icat -base64 path/to/image` -> write base64 of image to terminal (not quite useful I know)
 - `$ icat -base64 -out path/to/output path/to/image` -> write base64 of image to output file
 
