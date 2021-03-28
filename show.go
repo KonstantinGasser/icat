@@ -10,10 +10,10 @@ import (
 
 func printImage(resource resources.Resource) error {
 	// request to open file from resource
-	content, teardown, err := resource.Open()
+	content, _close, err := resource.Open()
 	// teardown holds resource specific instructions on how to close
 	// and clean up the opened resource
-	defer teardown()
+	defer _close()
 	if err != nil {
 		return fmt.Errorf("could not open resource: %v", err)
 	}
