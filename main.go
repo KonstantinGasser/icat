@@ -31,6 +31,10 @@ func main() {
 	writeBase64 := flag.String("out", "", "write base64 encoding of image to file")
 	flag.Parse()
 
+	if len(os.Args) <= 1 {
+		fmt.Println("please provide either a path to a local file, a http(s) like to an image or a smpt conntection to load an image from a remote server")
+		os.Exit(1)
+	}
 	if os.Args[1] == "version" {
 		fmt.Printf("icat version: %s\n", version)
 		return
